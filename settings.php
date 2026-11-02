@@ -19,15 +19,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $d->bind_param('si', $email, $uid); $d->execute();
             if ($d->get_result()->num_rows) $err = 'That email is already used by another account.';
         }
-        $pic = $u['profile_pic'];
-        if (!$err) {
+        $old_pic = $u['profile_pic'];
+        $pic = $old_pic;
+        if (!$err && !empty($_FILES['profile_pic']['name'])) {
             $new = save_image('profile_pic', 'profiles', $err);
-            if ($new) $pic = 'uploads/profiles/' . $new;
+            if ($new) {
+                $pic = 'uploads/profiles/' . $new;
+            }
         }
         if ($err) flash($err, 'error');
         else {
             $st = $conn->prepare("UPDATE users SET full_name=?, email=?, course_year=?, profile_pic=? WHERE user_id=?");
             $st->bind_param('ssssi', $name, $email, $cy, $pic, $uid); $st->execute();
+            if ($pic !== $old_pic && $old_pic && strpos($old_pic, 'uploads/profiles/') === 0) {
+                $old_file = __DIR__ . '/' . $old_pic;
+                if (file_exists($old_file)) {
+                    @unlink($old_file);
+                }
+            }
             flash('Profile updated.');
         }
     } elseif ($act === 'password') {
@@ -53,12 +62,12 @@ layout_start('Settings', $base, 'settings');
   <section class="panel">
     <h2>My Profile</h2>
     <div class="profile-top">
-      <img src="<?= e(pic_url($me['profile_pic'], $base)) ?>" alt="Profile picture">
+      <img id="profilePreview" src="<?= e(pic_url($me['profile_pic'], $base)) ?>" alt="Profile picture">
       <div><b><?= e($me['full_name']) ?></b><br><small style="color:var(--muted)">@<?= e($me['username']) ?> &middot; <?= ucfirst($role) ?><?= $me['student_no'] ? ' &middot; ' . e($me['student_no']) : '' ?></small></div>
     </div>
     <form method="post" enctype="multipart/form-data">
       <input type="hidden" name="action" value="profile">
-      <label>Profile Picture</label><input type="file" name="profile_pic" accept="image/png,image/jpeg,image/webp">
+      <label>Profile Picture</label><input type="file" id="profileInput" name="profile_pic" accept="image/png,image/jpeg,image/webp">
       <label>Full Name</label><input type="text" name="full_name" value="<?= e($me['full_name']) ?>" required>
       <label>Email</label><input type="email" name="email" value="<?= e($me['email']) ?>" required>
       <?php if ($role === 'student'): ?><label>Course &amp; Year</label><input type="text" name="course_year" value="<?= e($me['course_year']) ?>"><?php endif; ?>
@@ -76,4 +85,13 @@ layout_start('Settings', $base, 'settings');
     </form>
   </section>
 </div>
+<script>
+document.getElementById('profileInput')?.addEventListener('change', function(e) {
+  var file = e.target.files && e.target.files[0];
+  if (file && file.type.startsWith('image/')) {
+    var preview = document.getElementById('profilePreview');
+    if (preview) preview.src = URL.createObjectURL(file);
+  }
+});
+</script>
 <?php layout_end($base);

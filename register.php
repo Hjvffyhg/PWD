@@ -36,26 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$top = top_rated_books($conn, 5);
+$new = latest_books($conn, 6);
 layout_start('Register', $base);
 ?>
 <div class="grid g-hero">
   <div>
     <?php welcome_card(); ?>
-    <section class="panel">
-      <h2>Your gateway to knowledge, anytime, anywhere.</h2>
-      <p class="intro-text">Welcome to BAPS e-Library &ndash; your all-in-one digital hub for seamless book access and processing. Explore thousands of titles and manage your borrowing with ease.</p>
-      <a class="btn yellow sm" href="login.php">ALREADY REGISTERED? LOGIN</a>
-    </section>
-    <section class="panel">
-      <div class="carousel-nav">
-      <button type="button" data-scroll="topRow" data-dir="-1" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
-      <button type="button" data-scroll="topRow" data-dir="1" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
-    </div>
-    <h2 style="margin-top:-30px">High Rating Books</h2>
-      <?php if (!$top): ?><div class="empty"><i class="fa-solid fa-star"></i>No rated books yet.</div><?php endif; ?>
-      <div class="scroll-row" id="topRow"><?php foreach ($top as $b) echo book_card($b, $base); ?></div>
-    </section>
+    <?php newly_added_panel($new, $base); ?>
   </div>
   <section class="panel auth-card" style="align-self:start">
     <h2 style="font-size:2rem;text-align:left">Registration</h2>
@@ -73,8 +60,9 @@ layout_start('Register', $base);
       <input type="text" id="username" name="username" value="<?= e($f['username']) ?>" placeholder="juandelacruz" required>
       <label for="password">Password</label>
       <div class="pw"><input type="password" id="password" name="password" placeholder="At least 6 characters" required><button type="button" aria-label="Show password"><i class="fa-regular fa-eye"></i></button></div>
-      <button class="btn block" type="submit">REGISTER ACCOUNT</button>
+      <button class="btn block yellow" type="submit"><i class="fa-solid fa-user-plus"></i> REGISTER ACCOUNT</button>
     </form>
+    <p class="alt">ALREADY HAVE AN ACCOUNT?<a href="login.php">LOGIN HERE</a></p>
   </section>
 </div>
 <?php layout_end($base);

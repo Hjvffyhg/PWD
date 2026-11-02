@@ -26,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($title === '' || $author === '' || $isbn === '' || $cat === '' || $abs === '') $err = 'Title, author, ISBN, category and abstract are required.';
         elseif ($total < 1 || $total > 100) $err = 'Total copies must be between 1 and 100.';
         elseif ($pages < 1 || $pages > 1200) $err = 'Pages must be between 1 and 1,200.';
-        elseif (!preg_match('/^(\d{3}-\d-\d{2}-\d{6}-\d|\d{13}|\d{10})$/', $isbn)) $err = 'ISBN must be 13 digits in the format 978-0-00-000000-0.';
+        elseif (!preg_match('/^(?:\d{13}|\d{10}|\d{3}-\d+-\d+-\d+-\d)$/', $isbn) || (strpos($isbn, '-') !== false && strlen(preg_replace('/\D/', '', $isbn)) !== 13 && strlen(preg_replace('/\D/', '', $isbn)) !== 10)) $err = 'ISBN must be 13 digits in the format 978-0-00-000000-0.';
         elseif ($act === 'add' && empty($_FILES['cover']['name'])) $err = 'Please upload a book cover picture.';
         if (!$err) {
             $dup = $conn->prepare("SELECT book_id FROM books WHERE isbn=? AND book_id<>?");
@@ -83,7 +83,7 @@ layout_start('Inventory', $base, 'inventory');
       <td><span class="pill <?= $b['available_copies'] > 0 ? 'ok' : 'out' ?>"><?= (int)$b['available_copies'] ?> / <?= (int)$b['total_copies'] ?></span></td>
       <td><div class="actions">
         <button class="btn sm" data-open="bookForm" data-fill='<?= e(json_encode(['action' => 'edit', 'book_id' => $b['book_id'], 'title' => $b['title'], 'author' => $b['author'], 'isbn' => $b['isbn'], 'category' => $b['category'], 'abstract' => $b['abstract'], 'pages' => $b['pages'], 'total_copies' => $b['total_copies'], '_title' => 'Edit Book'])) ?>'><i class="fa-solid fa-pen"></i> Edit</button>
-        <form method="post" data-confirm="Delete this book permanently?"><input type="hidden" name="action" value="delete"><input type="hidden" name="book_id" value="<?= $b['book_id'] ?>"><button class="btn sm danger"><i class="fa-solid fa-trash"></i></button></form>
+        <form method="post" data-confirm="Delete this book permanently?"><input type="hidden" name="action" value="delete"><input type="hidden" name="book_id" value="<?= $b['book_id'] ?>"><button class="btn sm danger" aria-label="Delete book"><i class="fa-solid fa-trash"></i> Delete</button></form>
       </div></td>
     </tr>
     <?php endforeach; ?>

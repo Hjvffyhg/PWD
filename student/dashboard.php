@@ -14,7 +14,7 @@ $stat = $conn->query("SELECT
     FROM transactions WHERE user_id=$uid")->fetch_assoc();
 
 $new = $conn->query(book_select_for($uid) . " ORDER BY b.book_id DESC LIMIT 8")->fetch_all(MYSQLI_ASSOC);
-$top = $conn->query(book_select_for($uid) . " ORDER BY avg_rating DESC, times_borrowed DESC LIMIT 6")->fetch_all(MYSQLI_ASSOC);
+$top = $conn->query(book_select_for($uid) . " WHERE EXISTS (SELECT 1 FROM ratings r WHERE r.book_id = b.book_id AND r.user_id = $uid) ORDER BY avg_rating DESC, times_borrowed DESC LIMIT 6")->fetch_all(MYSQLI_ASSOC);
 $active = $conn->query("SELECT b.title, t.due_date, t.status FROM transactions t JOIN books b ON b.book_id=t.book_id
                         WHERE t.user_id=$uid AND t.status IN ('borrowed','return_requested') ORDER BY t.due_date")->fetch_all(MYSQLI_ASSOC);
 
@@ -48,14 +48,6 @@ layout_start('Dashboard', $base, 'dashboard');
 
 <div class="grid g2">
   <?php newly_added_panel($new, $base); ?>
-  <section class="panel">
-    <div class="carousel-nav">
-      <button type="button" data-scroll="topRow" data-dir="-1" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
-      <button type="button" data-scroll="topRow" data-dir="1" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
-    </div>
-    <h2 style="margin-top:-30px">High Rating Books</h2>
-    <?php if (!$top): ?><div class="empty"><i class="fa-solid fa-star"></i>No books yet.</div><?php endif; ?>
-    <div class="scroll-row" id="topRow"><?php foreach ($top as $b) echo book_card($b, $base); ?></div>
-  </section>
+  <?php top_rated_panel($top, $base); ?>
 </div>
 <?php layout_end($base);

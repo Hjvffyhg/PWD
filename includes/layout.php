@@ -28,7 +28,7 @@ function layout_start($title, $base, $active = '') {
     $logged = !empty($_SESSION['user_id']);
     $role   = $_SESSION['role'] ?? '';
     $me = null; $notifs = []; $unread = 0;
-    if ($logged) {
+    if ($logged && $conn) {
         $st = $conn->prepare("SELECT * FROM users WHERE user_id=?");
         $st->bind_param('i', $_SESSION['user_id']); $st->execute();
         $me = $st->get_result()->fetch_assoc();
@@ -52,7 +52,8 @@ function layout_start($title, $base, $active = '') {
 <title><?= e($title) ?> | BAPS e-Library</title>
 <link rel="icon" href="<?= $base ?>assets/images/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Oswald:wght@500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;0,900;1,400;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link rel="stylesheet" href="<?= $base ?>assets/css/style.css?v=<?= filemtime(__DIR__ . '/../assets/css/style.css') ?>">
 </head>
@@ -79,7 +80,7 @@ function layout_start($title, $base, $active = '') {
       </div>
     </div>
     <a class="user-chip" href="<?= $base ?>settings.php" title="My profile">
-      <img src="<?= e(pic_url($me['profile_pic'], $base)) ?>" alt="Profile"><span><?= e($me['full_name']) ?></span>
+      <img src="<?= e(pic_url($me['profile_pic'] ?? '', $base)) ?>" alt="Profile"><span><?= e($me['full_name'] ?? '') ?></span>
     </a>
   </div>
   <?php else: ?>
@@ -153,7 +154,7 @@ function layout_end($base) {
           </form>
           <form method="post" action="<?= $base ?>student/favorite.php">
             <input type="hidden" name="book_id" id="bmFavId">
-            <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI']) ?>">
+            <input type="hidden" name="back" value="<?= e($_SERVER['REQUEST_URI'] ?? '') ?>">
             <button class="btn ghost" type="submit" id="bmFavBtn"><i class="fa-regular fa-heart"></i> Favorite</button>
           </form>
         <?php elseif ($role === 'librarian'): ?>
@@ -166,7 +167,7 @@ function layout_end($base) {
     </div>
   </div>
 </div>
-<div class="footer">&copy; <?= date('Y') ?> BAPS e-Library &middot; Book Access and Processing System</div>
+<footer class="footer">&copy; <?= date('Y') ?> BAPS e-Library &middot; Book Access and Processing System</footer>
 <script src="<?= $base ?>assets/js/main.js?v=<?= filemtime(__DIR__ . '/../assets/js/main.js') ?>"></script>
 </body>
 </html>
@@ -175,6 +176,7 @@ function layout_end($base) {
 
 // Notify a student once per day about each overdue book
 function check_overdue($conn, $uid) {
+    if (!$conn) return;
     $st = $conn->prepare("SELECT b.title, t.due_date FROM transactions t JOIN books b ON b.book_id=t.book_id
                           WHERE t.user_id=? AND t.status='borrowed' AND t.due_date < CURDATE()");
     $st->bind_param('i', $uid); $st->execute();

@@ -60,13 +60,13 @@ layout_start('Students', $base, 'students');
 ?>
 <h1 class="page-title">Students <small>Manage registered student accounts.</small></h1>
 <?php show_flash(); ?>
-<section class="panel">
+<section class="panel students-panel">
   <div class="toolbar">
     <form method="get"><input type="text" name="q" value="<?= e($q) ?>" placeholder="Search name, student ID, username or email"><button class="btn" type="submit"><i class="fa-solid fa-magnifying-glass"></i> Search</button></form>
     <button class="btn yellow" data-open="stuForm" data-fill='<?= e(json_encode(['action' => 'add', 'user_id' => 0, 'full_name' => '', 'student_no' => '', 'email' => '', 'course_year' => '', 'username' => '', 'password' => '', '_title' => 'Register Student'])) ?>'><i class="fa-solid fa-user-plus"></i> Add Student</button>
   </div>
   <?php if (!$rows): ?><div class="empty"><i class="fa-solid fa-user-graduate"></i>No students found.</div><?php else: ?>
-  <div class="table-wrap"><table>
+  <div class="table-wrap students-table-wrap"><table class="students-table">
     <tr><th>Photo</th><th>Name</th><th>Student ID</th><th>Course &amp; Year</th><th>Email</th><th>Books Out</th><th>Actions</th></tr>
     <?php foreach ($rows as $s): ?>
     <tr>
@@ -75,11 +75,13 @@ layout_start('Students', $base, 'students');
       <td><?= e($s['student_no']) ?></td><td><?= e($s['course_year']) ?></td><td><?= e($s['email']) ?></td><td><?= (int)$s['out_now'] ?></td>
       <td><div class="actions">
         <button class="btn sm" data-open="stuForm" data-fill='<?= e(json_encode(['action' => 'edit', 'user_id' => $s['user_id'], 'full_name' => $s['full_name'], 'student_no' => $s['student_no'], 'email' => $s['email'], 'course_year' => $s['course_year'], 'username' => $s['username'], 'password' => '', '_title' => 'Edit Student'])) ?>'><i class="fa-solid fa-pen"></i> Edit</button>
-        <form method="post" data-confirm="Delete this student account?"><input type="hidden" name="action" value="delete"><input type="hidden" name="user_id" value="<?= $s['user_id'] ?>"><button class="btn sm danger"><i class="fa-solid fa-trash"></i></button></form>
+        <form method="post" data-confirm="Delete this student account?"><input type="hidden" name="action" value="delete"><input type="hidden" name="user_id" value="<?= $s['user_id'] ?>"><button class="btn sm danger"><i class="fa-solid fa-trash"></i> Delete</button></form>
       </div></td>
     </tr>
     <?php endforeach; ?>
-  </table></div><?php endif; ?>
+  </table></div>
+  <p class="table-scroll-hint"><i class="fa-solid fa-arrow-left"></i> Swipe or scroll horizontally to view all student details. <i class="fa-solid fa-arrow-right"></i></p>
+  <?php endif; ?>
 </section>
 
 <div class="modal" id="stuForm" aria-hidden="true">

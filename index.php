@@ -34,16 +34,6 @@ if ($q !== ''): ?>
 
 <div class="grid g2">
   <?php newly_added_panel($new, $base); ?>
-  <section class="panel">
-    <div class="carousel-nav">
-      <button type="button" data-scroll="topRow" data-dir="-1" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
-      <button type="button" data-scroll="topRow" data-dir="1" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
-    </div>
-    <h2 style="margin-top:-30px">High Rating Books</h2>
-    <?php if (!$top): ?><div class="empty"><i class="fa-solid fa-star"></i>No rated books yet.</div><?php endif; ?>
-    <div class="scroll-row" id="topRow">
-      <?php foreach ($top as $b) echo book_card($b, $base); ?>
-    </div>
-  </section>
+  <?php top_rated_panel($top, $base); ?>
 </div>
 <?php layout_end($base);

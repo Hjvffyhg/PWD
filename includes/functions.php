@@ -56,8 +56,15 @@ function save_image($field, $folder, &$error) {
     $ext = strtolower(pathinfo($f['name'], PATHINFO_EXTENSION));
     if (!in_array($ext, ['jpg','jpeg','png','webp'])) { $error = 'Only JPG, PNG or WEBP images are allowed.'; return null; }
     if ($f['size'] > 2 * 1024 * 1024) { $error = 'Image must be 2MB or smaller.'; return null; }
+    $targetDir = __DIR__ . '/../uploads/' . $folder;
+    if (!is_dir($targetDir)) {
+        if (!@mkdir($targetDir, 0777, true)) {
+            $error = 'Could not create upload directory.';
+            return null;
+        }
+    }
     $name = uniqid('img_', true) . '.' . $ext;
-    if (!move_uploaded_file($f['tmp_name'], __DIR__ . '/../uploads/' . $folder . '/' . $name)) { $error = 'Could not save the image.'; return null; }
+    if (!move_uploaded_file($f['tmp_name'], $targetDir . '/' . $name)) { $error = 'Could not save the image.'; return null; }
     return $name;
 }
 

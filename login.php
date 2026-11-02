@@ -34,11 +34,6 @@ layout_start('Login', $base);
 <div class="grid g-hero">
   <div>
     <?php welcome_card(); ?>
-    <section class="panel">
-      <h2>Your gateway to knowledge, anytime, anywhere.</h2>
-      <p class="intro-text">Welcome to BAPS e-Library &ndash; your all-in-one digital hub for seamless book access and processing. Streamline your research, explore thousands of titles, and manage your borrowing with ease.</p>
-      <a class="btn yellow sm" href="register.php">REGISTER NOW!</a>
-    </section>
     <?php newly_added_panel($new, $base); ?>
   </div>
   <section class="panel auth-card" style="align-self:start">
@@ -50,7 +45,7 @@ layout_start('Login', $base);
       <input type="text" id="identifier" name="identifier" data-studentid="auto" maxlength="60" value="<?= e($ident) ?>" placeholder="Enter username or student ID" required autofocus>
       <label for="password">Password</label>
       <div class="pw"><input type="password" id="password" name="password" placeholder="********" required><button type="button" aria-label="Show password"><i class="fa-regular fa-eye"></i></button></div>
-      <button class="btn block" type="submit">LOGIN</button>
+      <button class="btn block yellow" type="submit"><i class="fa-solid fa-right-to-bracket"></i> LOG IN</button>
     </form>
     <p class="alt">DON'T HAVE AN ACCOUNT YET?<a href="register.php">CREATE ACCOUNT/REGISTER HERE</a></p>
   </section>

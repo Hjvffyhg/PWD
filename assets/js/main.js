@@ -47,12 +47,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Generic modals
   function openModal(m) {
+    m.classList.remove("closing");
     m.classList.add("open");
     m.setAttribute("aria-hidden", "false");
   }
   function closeModal(m) {
-    m.classList.remove("open");
-    m.setAttribute("aria-hidden", "true");
+    if (!m.classList.contains("open") || m.classList.contains("closing")) return;
+    m.classList.add("closing");
+    setTimeout(function () {
+      m.classList.remove("open", "closing");
+      m.setAttribute("aria-hidden", "true");
+    }, 190);
   }
   document.querySelectorAll("[data-open]").forEach(function (b) {
     b.addEventListener("click", function () {
@@ -224,4 +229,35 @@ document.addEventListener("DOMContentLoaded", function () {
           inp.value = inp.value.trim() + " - ";
       });
     });
+
+  // Topbar scroll state for glassmorphic elevation
+  var topbar = document.querySelector(".topbar");
+  if (topbar) {
+    var checkScroll = function () {
+      topbar.classList.toggle("scrolled", window.scrollY > 15);
+    };
+    window.addEventListener("scroll", checkScroll, { passive: true });
+    checkScroll();
+  }
+
+  // Smooth entrance reveals for panels & cards
+  if ("IntersectionObserver" in window) {
+    var revealObserver = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("revealed");
+            revealObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -20px 0px" }
+    );
+    document
+      .querySelectorAll(".panel, .stat, .contact-card")
+      .forEach(function (el) {
+        el.classList.add("will-reveal");
+        revealObserver.observe(el);
+      });
+  }
 });
